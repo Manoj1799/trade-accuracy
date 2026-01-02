@@ -1,28 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Trade Accuracy</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { text-align:center; font-family:Arial; margin-top:50px; }
+    body { text-align:center; font-family:Arial; margin-top:40px; }
     .accuracy { font-size:32px; margin-bottom:20px; }
     button { padding:15px 25px; margin:10px; font-size:18px; }
   </style>
 </head>
+
 <body>
 
-  <div class="accuracy" id="acc">Accuracy: --</div>
+<div class="accuracy" id="acc">Accuracy: --</div>
 
- <button id="executeBtn" onclick="executeTrade()">Execute Trade</button>
+<button id="executeBtn" onclick="executeTrade()">Execute Trade</button>
 
 <div id="resultBtns" style="display:none;">
   <button onclick="closeTrade('win')">Profit</button>
   <button onclick="closeTrade('loss')">Loss</button>
 </div>
 
-
- <script>
-const URL = "SCRIPT_URL";
+<script>
+const URL = "https://script.google.com/macros/s/AKfycbxFXjXkXVRDTznTJylNlTwqpFhngtQ4c3r1MtRTmU-mS5nEWmGem8YruhvEHCjBvvJt/exec";
 
 function render(d) {
   const acc = d.total === 0 ? 0 : ((d.wins / d.total) * 100).toFixed(2);
@@ -36,7 +35,7 @@ function render(d) {
     d.open === 1 ? "block" : "none";
 }
 
-// Fetch on load
+// Fetch state on load
 fetch(URL)
   .then(r => r.json())
   .then(render);
@@ -55,7 +54,6 @@ function closeTrade(result) {
     .then(render);
 }
 </script>
-
 
 </body>
 </html>
