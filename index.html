@@ -13,22 +13,49 @@
 
   <div class="accuracy" id="acc">Accuracy: --</div>
 
-  <button onclick="addTrade('win')">Profit</button>
-  <button onclick="addTrade('loss')">Loss</button>
+ <button id="executeBtn" onclick="executeTrade()">Execute Trade</button>
 
-  <script>
-    const URL = "https://script.google.com/macros/s/AKfycbxB83Me64TCVRi1ThORvWTfzJBrSOCJyBIau9wIy8ljaBmgcinYmEyPV0GSHpTeOWZw/exec";
+<div id="resultBtns" style="display:none;">
+  <button onclick="closeTrade('win')">Profit</button>
+  <button onclick="closeTrade('loss')">Loss</button>
+</div>
 
-    function addTrade(result) {
-      fetch(URL + "?result=" + result)
-        .then(r => r.json())
-        .then(d => {
-          const acc = ((d.wins / d.total) * 100).toFixed(2);
-          document.getElementById("acc").innerText =
-            `Accuracy: ${acc}% (${d.wins}/${d.total})`;
-        });
-    }
-  </script>
+
+ <script>
+const URL = "SCRIPT_URL";
+
+function render(d) {
+  const acc = d.total === 0 ? 0 : ((d.wins / d.total) * 100).toFixed(2);
+  document.getElementById("acc").innerText =
+    `Accuracy: ${acc}% (${d.wins}/${d.total})`;
+
+  document.getElementById("executeBtn").style.display =
+    d.open === 0 ? "inline-block" : "none";
+
+  document.getElementById("resultBtns").style.display =
+    d.open === 1 ? "block" : "none";
+}
+
+// Fetch on load
+fetch(URL)
+  .then(r => r.json())
+  .then(render);
+
+// Execute trade
+function executeTrade() {
+  fetch(URL + "?action=execute")
+    .then(r => r.json())
+    .then(render);
+}
+
+// Close trade
+function closeTrade(result) {
+  fetch(URL + "?result=" + result)
+    .then(r => r.json())
+    .then(render);
+}
+</script>
+
 
 </body>
 </html>
