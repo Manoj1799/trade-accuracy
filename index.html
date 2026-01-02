@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Trade Accuracy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { text-align:center; font-family:Arial; margin-top:50px; }
+    .accuracy { font-size:32px; margin-bottom:20px; }
+    button { padding:15px 25px; margin:10px; font-size:18px; }
+  </style>
+</head>
+<body>
+
+  <div class="accuracy" id="acc">Accuracy: --</div>
+
+  <button onclick="addTrade('win')">Profit</button>
+  <button onclick="addTrade('loss')">Loss</button>
+
+  <script>
+    const URL = "https://script.google.com/macros/s/AKfycbxB83Me64TCVRi1ThORvWTfzJBrSOCJyBIau9wIy8ljaBmgcinYmEyPV0GSHpTeOWZw/exec";
+
+    function addTrade(result) {
+      fetch(URL + "?result=" + result)
+        .then(r => r.json())
+        .then(d => {
+          const acc = ((d.wins / d.total) * 100).toFixed(2);
+          document.getElementById("acc").innerText =
+            `Accuracy: ${acc}% (${d.wins}/${d.total})`;
+        });
+    }
+  </script>
+
+</body>
+</html>
