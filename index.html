@@ -6,6 +6,7 @@
     body { text-align:center; font-family:Arial; margin-top:40px; }
     .accuracy { font-size:32px; margin-bottom:20px; }
     button { padding:15px 25px; margin:10px; font-size:18px; }
+    textarea { font-size:16px; }
   </style>
 </head>
 
@@ -19,60 +20,92 @@
   <button onclick="closeTrade('win')">Profit</button>
   <button onclick="closeTrade('loss')">Loss</button>
 </div>
-  <div id="remarksBox" style="display:none;">
-  <textarea id="remarks" placeholder="Write remarks..." rows="3" cols="30"></textarea><br>
-  <button onclick="submitProfit()">Submit</button>
-</div>
 
 <div id="lossTypeBtns" style="display:none;">
   <button onclick="selectLoss('DIRECTION')">Direction</button>
   <button onclick="selectLoss('ENTRY')">Entry</button>
 </div>
 
+<div id="remarksBox" style="display:none;">
+  <textarea id="remarks" placeholder="Write remarks..." rows="3" cols="30"></textarea><br>
+  <button onclick="submitTrade()">Submit</button>
+</div>
 
 <script>
-const URL = "https://script.google.com/macros/s/AKfycbyvHKryjOI4uj9S2_G35C9H2RR86wSZc29IKp-HnqeLgMd5jCHLus9QnUqmJkU2-hUO/exec" ;
-let selectedLossType = "";
+const URL = "https://script.google.com/macros/s/AKfycbyvHKryjOI4uj9S2_G35C9H2RR86wSZc29IKp-HnqeLgMd5jCHLus9QnUqmJkU2-hUO/exec";
 
+let mode = "";            // "win" | "loss"
+let selectedLossType = ""; // DIRECTION | ENTRY
+
+// ---------- RENDER ----------
+function render(d) {
+  const acc = d.total === 0 ? 0 : ((d.wins / d.total) * 100).toFixed(2);
+  document.getElementById("acc").innerText =
+    `Accuracy: ${acc}% (${d.wins}/${d.total})`;
+
+  document.getElementById("executeBtn").style.display =
+    d.open === 0 ? "inline-block" : "none";
+
+  document.getElementById("resultBtns").style.display =
+    d.open === 1 ? "block" : "none";
+
+  document.getElementById("lossTypeBtns").style.display = "none";
+  document.getElementById("remarksBox").style.display = "none";
+}
+
+// ---------- LOAD STATE ----------
+fetch(URL)
+  .then(r => r.json())
+  .then(render);
+
+// ---------- EXECUTE ----------
+function executeTrade() {
+  fetch(URL + "?action=execute")
+    .then(r => r.json())
+    .then(render);
+}
+
+// ---------- CLOSE ----------
 function closeTrade(result) {
+  document.getElementById("resultBtns").style.display = "none";
+
   if (result === "win") {
+    mode = "win";
     document.getElementById("remarksBox").style.display = "block";
   } else {
+    mode = "loss";
     document.getElementById("lossTypeBtns").style.display = "block";
   }
 }
 
-function submitProfit() {
-  const remarks = document.getElementById("remarks").value;
-  fetch(URL + "?result=win&remarks=" + encodeURIComponent(remarks))
-    .then(r => r.json())
-    .then(d => {
-      document.getElementById("remarks").value = "";
-      document.getElementById("remarksBox").style.display = "none";
-      render(d);
-    });
-}
-
+// ---------- LOSS TYPE ----------
 function selectLoss(type) {
   selectedLossType = type;
   document.getElementById("lossTypeBtns").style.display = "none";
   document.getElementById("remarksBox").style.display = "block";
-
-  document.querySelector("#remarksBox button").onclick = submitLoss;
 }
 
-function submitLoss() {
-  const remarks = document.getElementById("remarks").value;
-  fetch(
-    URL +
-      "?result=loss" +
-      "&lossType=" + selectedLossType +
-      "&remarks=" + encodeURIComponent(remarks)
-  )
+// ---------- SUBMIT ----------
+function submitTrade() {
+  const remarks = document.getElementById("remarks").value.trim();
+  if (!remarks) return;
+
+  let url = URL;
+
+  if (mode === "win") {
+    url += "?result=win&remarks=" + encodeURIComponent(remarks);
+  } else {
+    url += "?result=loss"
+        + "&lossType=" + selectedLossType
+        + "&remarks=" + encodeURIComponent(remarks);
+  }
+
+  fetch(url)
     .then(r => r.json())
     .then(d => {
       document.getElementById("remarks").value = "";
-      document.getElementById("remarksBox").style.display = "none";
+      mode = "";
+      selectedLossType = "";
       render(d);
     });
 }
